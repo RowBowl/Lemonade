@@ -3,6 +3,9 @@ package com.example.lemonade
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,9 +24,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -32,6 +37,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.lemonade.ui.theme.LemonadeTheme
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,11 +89,18 @@ class MainActivity : ComponentActivity() {
 
         }
 
+        val scale = remember { Animatable(1f) }
+        val coroutineScope = rememberCoroutineScope()
+
         Column (
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = modifier
         ) {
             Button(onClick = {
+                coroutineScope.launch {
+                    scale.animateTo(0.75F, tween(100))
+                    scale.animateTo(1F, tween(100))
+                }
                 if(numSqueezes == 0) { //first squeeze of screen
                     goalSqueezes = (1..3).random()
                     numSqueezes += 1 //continue squeezing
@@ -104,7 +117,9 @@ class MainActivity : ComponentActivity() {
             },
                 shape = RoundedCornerShape(20.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.secondary)) {
+                    containerColor = MaterialTheme.colorScheme.secondary),
+                modifier = Modifier.scale(scale = scale.value)
+            ) {
                 Image(
                     painter = painterResource(id = imageResource),
                     contentDescription = stringResource(id = stringResource)
